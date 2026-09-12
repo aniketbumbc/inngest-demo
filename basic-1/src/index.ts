@@ -2,12 +2,12 @@ import { Inngest } from 'inngest';
 
 export const inngest = new Inngest({ id: 'test-app' });
 
-const helloWorld = inngest.createFunction(
+export const helloWorld = inngest.createFunction(
   { id: 'hello-world', triggers: { event: 'test/hello-world' } },
   async ({ event, step }) => {
     console.log('Hello, world!');
-    console.log(event.name);
-    console.log(event.data);
+    console.log('Event name', event.name);
+    console.log('Event data', event.data);
     return {
       message: `${event.name} ${event.data} || Hello World`,
       recievedAt: new Date().toISOString(),
@@ -17,14 +17,17 @@ const helloWorld = inngest.createFunction(
 
 console.log('Function created', helloWorld.id());
 
-const multistepFunction = inngest.createFunction(
-  { id: 'multistep-function-demo', triggers: { event: 'test/multistep-function-demo' } },
+export const multistepFunction = inngest.createFunction(
+  {
+    id: 'multistep-function-demo',
+    triggers: { event: 'test/multistep-function-demo' },
+  },
   async ({ event, step }) => {
     const firstTask = await step.run('step-1', async () => {
       // step 1 create 1 task hold it
       console.log(' Executing Step 1');
       return {
-        message: 'Step 1 executed',
+        message: 'Step 1 executed' + ' ' + event.data.name,
         recievedAt: new Date().toISOString(),
       };
     });
@@ -44,10 +47,10 @@ const multistepFunction = inngest.createFunction(
     const thirdTask = await step.run('step-3', async () => {
       console.log(' Executing Step 3');
       return {
-        message: `Step 3 executed ${secondTask.message}`,
+        message: `Step 3 executed ${firstTask?.message} ${secondTask?.message}`,
         previousTask: {
-          message: [secondTask.message, firstTask.message],
-          recievedAt: [secondTask.recievedAt, firstTask.recievedAt],
+          message: [secondTask?.message, firstTask?.message],
+          recievedAt: [secondTask?.recievedAt, firstTask?.recievedAt],
         },
         recievedAt: new Date().toISOString(),
       };
@@ -55,7 +58,7 @@ const multistepFunction = inngest.createFunction(
     console.log('Third task result ', thirdTask);
 
     return {
-      message: `Multistep function executed from async step ${firstTask.message} ${secondTask.message} ${thirdTask.message}`,
+      message: `Multistep function executed from async step ${firstTask?.message} ${thirdTask?.message}`,
       recievedAt: new Date().toISOString(),
     };
   },
