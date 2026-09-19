@@ -94,7 +94,7 @@ app.post('/test-hello-world', async (req, res) => {
   }
 });
 
-// test multistep function
+// test multistep function for inngest
 app.post('/test-multistep-function', async (req, res) => {
   try {
     console.log('Sending event to multistep-function');
